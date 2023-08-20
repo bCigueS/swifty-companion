@@ -1,6 +1,5 @@
 import { Colors } from '../constant/color';
-import { View, Text, StyleSheet, SafeAreaView, Pressable } from 'react-native';
-import Title from '../components/Title';
+import { View, StyleSheet, SafeAreaView, Pressable } from 'react-native';
 import LogoSchool from '../assets/42_Logo.svg';
 import { DiscoveryDocument, useAuthRequest } from 'expo-auth-session';
 
@@ -9,6 +8,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { UID, REDIRECT_URI } from '@env';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContextProvider';
+import { MyText } from '../components/MyText';
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -25,6 +25,8 @@ const Login = () => {
 		discovery
 	);
 
+	console.log(REDIRECT_URI);
+
 	const onPressHandler = async() => {
 		const response = await promptAsync();
 		if (response.type === 'success') {
@@ -37,8 +39,8 @@ const Login = () => {
 		<SafeAreaView style={styles.container}>
 			<View style={styles.mainContainer}>
 				<View style={styles.infoContainer}>
-					<Title>Login</Title>
-					<Text>Login with 42</Text>
+					<MyText>Login</MyText>
+					<MyText>Login with 42</MyText>
 				</View>
 				<Pressable style={styles.loginButton} onPress={onPressHandler}>
 					<LogoSchool height="40" width="40" fill='white' />
@@ -53,12 +55,13 @@ export default Login;
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		padding: 24,
+		paddingTop: 50,
 		justifyContent: 'center',
+		paddingHorizontal: 16,
 	},
 	mainContainer: {
-		marginTop: 32,
 		gap: 32,
+		marginHorizontal: 12,
 		padding: 24,
 		borderRadius: 16,
 		borderColor: Colors.black,

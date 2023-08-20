@@ -19,13 +19,14 @@ interface AuthState {
 	isSignout: boolean;
 	isLoading: boolean;
 	logUser: User | null;
+	usersList: User[];
 }
 
 export interface User {
-	login: string,
-	name: string,
-	avatar: string,
-	level: number,
+	login: string;
+	name: string;
+	avatar?: string;
+	level: number;
 }
 
 const initialState = {
@@ -33,12 +34,14 @@ const initialState = {
 	isSignout: false,
 	isLoading: true,
 	logUser: null,
+	usersList: [],
 };
 
 type AuthAction =
 	| { type: 'RESTORE_TOKEN'; payload: string | null }
 	| { type: 'SIGN_IN'; payload: string }
-	| { type: 'USER_LOG'; payload: User}
+	| { type: 'USER_LOG'; payload: User }
+	| { type: 'LIST'; payload: User[] }
 	| { type: 'SIGN_OUT' };
 
 const TOKEN_URL = 'https://api.intra.42.fr/oauth/token';
@@ -46,15 +49,15 @@ const TOKEN_URL = 'https://api.intra.42.fr/oauth/token';
 export const AuthContext = createContext<{
 	login: (code: string) => void;
 	logout: () => void;
+	getUsersList: (login: string) => void;
 	tokenInfo: () => void;
-	getMe: () => void;
 	state: AuthState;
 	dispatch: React.Dispatch<any>;
 }>({
 	login: (code: string) => {},
 	logout: () => {},
+	getUsersList: (login: string) => {},
 	tokenInfo: () => {},
-	getMe: () => {},
 	state: initialState,
 	dispatch: () => null,
 });
@@ -79,11 +82,17 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 					...state,
 					isSignout: true,
 					userToken: null,
+					usersList: [],
 				};
-			case 'USER_LOG': 
+			case 'USER_LOG':
 				return {
 					...state,
 					logUser: action.payload,
+				};
+			case 'LIST':
+				return {
+					...state,
+					usersList: action.payload,
 				}
 			default:
 				return state;
@@ -101,12 +110,14 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 				console.error(error);
 			}
 			if (userToken) {
+				getMe();
 				dispatch({ type: 'RESTORE_TOKEN', payload: userToken });
 			}
 		};
 		bootstrapAsync();
 	}, []);
 
+	
 
 	const tokenNeedRefresh = async () => {
 		const tokenInfo = await SecureStore.getItemAsync('userToken');
@@ -139,7 +150,7 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 
 	const refreshToken = async () => {
 		try {
-			const needRefresh = await tokenNeedRefresh()
+			const needRefresh = await tokenNeedRefresh();
 			if (!needRefresh) {
 				return await getTokenInfo('ACCESS');
 			} else {
@@ -156,14 +167,42 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 				dispatch({
 					type: 'RESTORE_TOKEN',
 					payload: response.data.access_token,
-				})
+				});
 				return response.data.access_token;
 			}
 		} catch (error: any) {
 			console.error(error);
 		}
 	};
-	
+
+	const getMe = async () => {
+		try {
+			const tokenInfo = await SecureStore.getItemAsync(
+				'userToken'
+			);
+			if (tokenInfo) {
+				const { access_token: token } = JSON.parse(tokenInfo);
+				const response = await axios.get(
+					'https://api.intra.42.fr/v2/users/sbeylot',
+					{
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				);
+				const data = response.data;
+				const logUser: User = {
+					login: data.login,
+					name: data.displayname,
+					avatar: data.image.versions.small,
+					level: Math.round(data.cursus_users.pop().level),
+				};
+				dispatch({ type: 'USER_LOG', payload: logUser });
+			}
+		} catch (error: any) {
+			console.error(error.message);
+		}
+	}
 
 	const authContext = useMemo(
 		() => ({
@@ -182,8 +221,9 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 						type: 'SIGN_IN',
 						payload: response.data.access_token,
 					});
+					getMe();
 				} catch (error: any) {
-					console.error(error);
+					console.error("ContextAPI: login --> ", error);
 				}
 			},
 
@@ -191,48 +231,33 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 				await SecureStore.deleteItemAsync('userToken');
 				dispatch({ type: 'SIGN_OUT' });
 			},
-			tokenInfo: async () => {
+			getUsersList: async(login: string) => {
 				try {
-					const response = await axios.get(
-						'https://api.intra.42.fr/oauth/token/info',
-						{
-							headers: {
-								Authorization: `Bearer ${state.userToken}`,
-							},
+					const access_token = await getTokenInfo('ACCESS');
+					const params = login.toLowerCase() + ',' + login.toLowerCase() + 'z';
+					const response = await axios.get(`https://api.intra.42.fr/v2/campus/1/users?range[login]=${params}`, {
+						headers: {Authorization: `Bearer ${access_token}`}
+					});
+					console.log(response.data);
+					const usersList: User[] = response.data.map((item: any) => {
+						const user: User = {
+							login: item.login,
+							name: item.displayname,
+							avatar: item.image.versions.small ? item.image.versions.small : undefined,
+							level: item.cursus_users ? Math.round(item.cursus_users.pop().level) : 0,
 						}
-					);
-				} catch (error: any) {
+						return user;
+					})
+					console.log(usersList);
+					dispatch({ type: 'LIST', payload: usersList})
+				} catch(error: any) {
 					console.error(error);
 				}
 			},
-			getMe: async () => {
+			tokenInfo: async () => {
 				try {
-					const tokenInfo = await SecureStore.getItemAsync(
-						'userToken'
-					);
-					if (tokenInfo) {
-						const { access_token: token } = JSON.parse(tokenInfo);
-						const response = await axios.get(
-							'https://api.intra.42.fr/v2/users/sbeylot',
-							{
-								headers: {
-									Authorization: `Bearer ${token}`,
-								},
-							}
-						);
-						const data = response.data;
-						console.log(response.data);
-						const logUser: User = {
-							login: data.login,
-							name: data.displayname,
-							avatar: data.image.versions.small,
-							level: data.cursus_users.pop().level,
-						}
-						console.log(logUser);
-						dispatch({type: 'USER_LOG', payload: logUser})
-					}
 				} catch (error: any) {
-					console.error(error.message);
+					console.error(error);
 				}
 			},
 			state,
@@ -240,7 +265,6 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 		}),
 		[state]
 	);
-
 
 	return (
 		<AuthContext.Provider value={authContext}>

@@ -1,20 +1,29 @@
-import { AuthContext, User } from '../context/AuthContextProvider';
-import { Colors } from '../constant/color';
-import { StyleSheet, View, Text, Image } from 'react-native';
-import { useContext } from 'react';
-import Title from './Title';
+import { User } from '../context/AuthContextProvider';
+import { StyleSheet, View, Pressable } from 'react-native';
+import { MyText } from './MyText';
+import ProfilPicture from './ProfilPicture';
 
-const ProfilCard = () => {
-	const { state } = useContext(AuthContext);
-	const user: User | null = state.logUser;
+interface ProfilCardProps {
+	user: User;
+}
+
+const ProfilCard: React.FC<ProfilCardProps> = ({ user }) => {
 	return (
 		<View style={styles.container}>
-			<Image style={styles.image} source={{ uri: user?.avatar }} />
-			<View style={styles.nameContainer} >
-				<Title>{user?.name}</Title>
-				<Text>{user?.login}</Text>
-				<Text>{user?.level}</Text>
-			</View>
+			<Pressable>
+				<View style={styles.infoContainer}>
+					<View style={styles.imageContainer}>
+						<ProfilPicture
+							user={user}
+							size={{ width: 75, height: 75 }}
+						/>
+					</View>
+					<View style={styles.nameContainer}>
+						<MyText style={styles.name}>{user?.name}</MyText>
+						<MyText style={styles.login}>{user?.login}</MyText>
+					</View>
+				</View>
+			</Pressable>
 		</View>
 	);
 };
@@ -23,22 +32,26 @@ export default ProfilCard;
 
 const styles = StyleSheet.create({
 	container: {
-		borderColor: Colors.black,
-		borderWidth: 2,
-		padding: 24,
-		borderRadius: 18,
-		backgroundColor: Colors.white,
+		padding: 20,
+	},
+	infoContainer: {
 		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		gap: 16,
-		width: '100%',
 	},
 	nameContainer: {
+		justifyContent: 'center',
 	},
-	image: {
-		borderRadius: 40,
-		width: 80,
-		height: 80,
+	imageContainer: {
+		justifyContent: 'center',
+		alignItems: 'center',
+		position: 'relative',
+		marginRight: 12,
+	},
+	name: {
+		fontSize: 18,
+		fontFamily: 'DMSansBold',
+		letterSpacing: -1,
+	},
+	login: {
+		opacity: 0.45,
 	},
 });
