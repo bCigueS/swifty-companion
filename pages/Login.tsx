@@ -25,7 +25,6 @@ const Login = () => {
 		discovery
 	);
 
-	console.log(REDIRECT_URI);
 
 	const onPressHandler = async() => {
 		const response = await promptAsync();

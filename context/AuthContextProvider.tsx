@@ -18,7 +18,7 @@ interface AuthState {
 	userToken: string | null;
 	isSignout: boolean;
 	isLoading: boolean;
-	logUser: User | null;
+	logUser: User | undefined;
 	usersList: User[];
 }
 
@@ -26,14 +26,15 @@ export interface User {
 	login: string;
 	name: string;
 	avatar?: string;
-	level: number;
+	level?: string;
+	levelPourcentage?: number;
 }
 
 const initialState = {
 	userToken: null,
 	isSignout: false,
 	isLoading: true,
-	logUser: null,
+	logUser: undefined,
 	usersList: [],
 };
 
@@ -195,7 +196,6 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 					login: data.login,
 					name: data.displayname,
 					avatar: data.image.versions.small,
-					level: Math.round(data.cursus_users.pop().level),
 				};
 				dispatch({ type: 'USER_LOG', payload: logUser });
 			}
@@ -238,17 +238,15 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 					const response = await axios.get(`https://api.intra.42.fr/v2/campus/1/users?range[login]=${params}`, {
 						headers: {Authorization: `Bearer ${access_token}`}
 					});
-					console.log(response.data);
+					
 					const usersList: User[] = response.data.map((item: any) => {
 						const user: User = {
 							login: item.login,
 							name: item.displayname,
 							avatar: item.image.versions.small ? item.image.versions.small : undefined,
-							level: item.cursus_users ? Math.round(item.cursus_users.pop().level) : 0,
 						}
 						return user;
 					})
-					console.log(usersList);
 					dispatch({ type: 'LIST', payload: usersList})
 				} catch(error: any) {
 					console.error(error);

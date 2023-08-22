@@ -1,16 +1,20 @@
 import React, { useContext } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { AuthContext, User } from '../context/AuthContextProvider';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 import Login from './Login';
-import { AuthContext } from '../context/AuthContextProvider';
 import SearchScreen from './Search';
-import { View, StyleSheet } from 'react-native';
-import BottomTabs from '../components/BottomTabs';
 import Profile from './Profile';
+import { MyText } from '../components/MyText';
+import axios from 'axios';
 
 export type RootStackParamList = {
 	Search: undefined;
-	Profile: undefined;
+	Profile: { login: string };
 	Login: undefined;
 };
 
@@ -18,6 +22,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const Screens: React.FC = () => {
 	const authCtx = useContext(AuthContext);
+
 	return (
 		<View style={styles.appContainer}>
 			<NavigationContainer>
@@ -44,11 +49,21 @@ const Screens: React.FC = () => {
 								key='Profile'
 								name='Profile'
 								component={Profile}
+								initialParams={{
+									login: authCtx.state.logUser?.login,
+								}}
+								options={{
+									headerShown: true,
+									headerTransparent: true,
+									headerTitleStyle: {
+										fontFamily: 'DMSansBold',
+										fontSize: 24,
+									},
+								}}
 							/>
 						</>
 					)}
 				</Stack.Navigator>
-				{authCtx.state.userToken && <BottomTabs navigation={Stack.Navigator} />}
 			</NavigationContainer>
 		</View>
 	);
@@ -63,7 +78,9 @@ const styles = StyleSheet.create({
 	},
 	contentContainer: {
 		paddingHorizontal: 32,
-		paddingTop: 50,
+		paddingTop: 20,
 		backgroundColor: '#F1F8FF',
 	},
 });
+
+

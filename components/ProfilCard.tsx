@@ -2,15 +2,22 @@ import { User } from '../context/AuthContextProvider';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { MyText } from './MyText';
 import ProfilPicture from './ProfilPicture';
+import { useNavigation } from '@react-navigation/native';
+import { ProfileScreenProps } from 'pages/Profile';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from 'pages/Screens';
 
 interface ProfilCardProps {
 	user: User;
+	navigation: NativeStackNavigationProp<RootStackParamList, "Search">;
 }
 
-const ProfilCard: React.FC<ProfilCardProps> = ({ user }) => {
+const ProfilCard: React.FC<ProfilCardProps> = ({ user, navigation }) => {
+
+
 	return (
 		<View style={styles.container}>
-			<Pressable>
+			<Pressable onPress={() => navigation.navigate('Profile', {login: user.login})}>
 				<View style={styles.infoContainer}>
 					<View style={styles.imageContainer}>
 						<ProfilPicture

@@ -4,32 +4,39 @@ import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContextProvider';
 import { SimpleLineIcons } from '@expo/vector-icons';
 
-
-
-
 const SearchBar = () => {
+	const [userInput, setUserInput] = useState<string>('');
+	const { getUsersList } = useContext(AuthContext);
 
-	const[ userInput, setUserInput ] = useState<string>('');
-	const { getUsersList, state } = useContext(AuthContext);
-
-	const searchHandler = async() => {
+	const searchHandler = async () => {
 		await getUsersList(userInput);
-
-	}
+	};
 
 	const userInputHandler = (input: string) => {
 		setUserInput(input);
-	}
-	
+	};
+
 	return (
 		<View style={styles.container}>
 			<Pressable onPress={searchHandler}>
 				<View style={styles.glass}>
-				<SimpleLineIcons name='magnifier' size={20} color={Colors.white} />
+					<SimpleLineIcons
+						name='magnifier'
+						size={20}
+						color={Colors.white}
+					/>
 				</View>
 			</Pressable>
 			<View style={styles.inputContainer}>
-				<TextInput style={styles.inputUser} placeholder='Search 42 User' onChangeText={userInputHandler} onSubmitEditing={searchHandler}/>
+				<TextInput
+					style={styles.inputUser}
+					placeholder='Search 42 User'
+					onChangeText={userInputHandler}
+					onSubmitEditing={searchHandler}
+					autoCapitalize='none'
+					autoCorrect= {false}
+					returnKeyType='done'
+				/>
 			</View>
 		</View>
 	);
@@ -53,7 +60,7 @@ const styles = StyleSheet.create({
 	inputContainer: {
 		// backgroundColor: 'red',
 		marginHorizontal: 16,
-		flex:1,
+		flex: 1,
 	},
 	glass: {
 		height: 40,
@@ -63,12 +70,11 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		elevation: 5,
-
 	},
 	inputUser: {
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		fontFamily: 'DMSansRegular'
-	}
-})
+		fontFamily: 'DMSansRegular',
+	},
+});
