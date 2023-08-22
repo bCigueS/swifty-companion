@@ -5,7 +5,6 @@ import {
 	useEffect,
 	useMemo,
 	useReducer,
-	useState,
 } from 'react';
 import { UID, SECRET, REDIRECT_URI } from '@env';
 import * as SecureStore from 'expo-secure-store';
@@ -51,14 +50,12 @@ export const AuthContext = createContext<{
 	login: (code: string) => void;
 	logout: () => void;
 	getUsersList: (login: string) => void;
-	tokenInfo: () => void;
 	state: AuthState;
 	dispatch: React.Dispatch<any>;
 }>({
 	login: (code: string) => {},
 	logout: () => {},
 	getUsersList: (login: string) => {},
-	tokenInfo: () => {},
 	state: initialState,
 	dispatch: () => null,
 });
@@ -249,12 +246,6 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 					})
 					dispatch({ type: 'LIST', payload: usersList})
 				} catch(error: any) {
-					console.error(error);
-				}
-			},
-			tokenInfo: async () => {
-				try {
-				} catch (error: any) {
 					console.error(error);
 				}
 			},

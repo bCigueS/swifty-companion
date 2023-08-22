@@ -4,13 +4,10 @@ import { AuthContext, User } from '../context/AuthContextProvider';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Login from './Login';
 import SearchScreen from './Search';
 import Profile from './Profile';
-import { MyText } from '../components/MyText';
-import axios from 'axios';
 
 export type RootStackParamList = {
 	Search: undefined;
@@ -18,13 +15,17 @@ export type RootStackParamList = {
 	Login: undefined;
 };
 
+interface ScreenProps {
+	onLayoutRootView: () => Promise<void>;
+}
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const Screens: React.FC = () => {
+const Screens: React.FC<ScreenProps> = ({ onLayoutRootView }) => {
 	const authCtx = useContext(AuthContext);
 
 	return (
-		<View style={styles.appContainer}>
+		<View style={styles.appContainer} onLayout={onLayoutRootView}>
 			<NavigationContainer>
 				<Stack.Navigator
 					screenOptions={{

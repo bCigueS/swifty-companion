@@ -2,8 +2,6 @@ import { User } from '../context/AuthContextProvider';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { MyText } from './MyText';
 import ProfilPicture from './ProfilPicture';
-import { useNavigation } from '@react-navigation/native';
-import { ProfileScreenProps } from 'pages/Profile';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from 'pages/Screens';
 

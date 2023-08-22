@@ -1,11 +1,12 @@
-import { StyleSheet } from 'react-native';
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 
 import * as SplashScreen from 'expo-splash-screen';
 import * as Fonts from 'expo-font';
 
 import AuthContextProvider from './context/AuthContextProvider';
 import Screens from './pages/Screens';
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
 	const [fontsLoaded] = Fonts.useFonts({
@@ -14,21 +15,18 @@ export default function App() {
 		DMSansELight: require('./assets/fonts/DMSans-ExtraLight.ttf'),
 	});
 
-	if (fontsLoaded) {
-		SplashScreen.hideAsync();
+	const onLayoutRootView = useCallback( async () => {
+		if (fontsLoaded) {
+			await SplashScreen.hideAsync();
+		}
+	}, [fontsLoaded])
+	if (!fontsLoaded) {
+		return null;
 	}
-
-	useEffect(() => {
-		const prepare = async () => {
-			await SplashScreen.preventAutoHideAsync();
-		};
-
-		prepare();
-	}, []);
 
 	return (
 		<AuthContextProvider>
-			<Screens />
+			<Screens onLayoutRootView={onLayoutRootView}/>
 		</AuthContextProvider>
 	);
 }

@@ -38,7 +38,6 @@ const Profile: React.FC<ProfileScreenProps> = ({ route, navigation }) => {
 	const { login } = route.params;
 	const { state } = useContext(AuthContext);
 	const [user, setUser] = useState<DisplayUserInfo | undefined>(undefined);
-	const [ userProjects, setUserProjects ] = useState<ProjectInfo[]>([]);	
 
 	useEffect(() => {
 
@@ -46,8 +45,6 @@ const Profile: React.FC<ProfileScreenProps> = ({ route, navigation }) => {
 			const userProjects: [] = projects.filter((item: any) => {
 				return lastCursus === item.cursus_ids[0];
 			});
-
-			console.log('Debug: ', userProjects);
 
 			const formatProjects: ProjectInfo[] = userProjects.map((item: any) => {
 				const projectInfo: ProjectInfo = {
@@ -58,7 +55,6 @@ const Profile: React.FC<ProfileScreenProps> = ({ route, navigation }) => {
 				};
 				return projectInfo;
 			})
-			console.log("formatProjects: ", formatProjects);
 			return formatProjects;
 		}
 
@@ -245,6 +241,5 @@ const styles = StyleSheet.create({
 	projectMark: {
 		fontFamily: 'DMSansBold',
 		fontSize: 16,
-		// color: Colors.green,		
 	}
 });

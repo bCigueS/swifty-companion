@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
+import { View, StyleSheet, TextInput, Pressable } from 'react-native';
 import { Colors } from '../constant/color';
 import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContextProvider';
